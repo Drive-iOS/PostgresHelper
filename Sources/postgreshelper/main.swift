@@ -12,6 +12,8 @@ struct PostgresSetUp: ParsableCommand {
               let _ = try? JSONDecoder().decode(Config.self, from: configData) else {
             return
         }
+
+        // TODO: (Aman Ketebo) Check current hash against drive api repo's build script hash
     }
 }
 
