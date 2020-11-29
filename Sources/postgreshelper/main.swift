@@ -6,14 +6,18 @@ struct PostgresSetUp: ParsableCommand {
     var configAbsolutePath: String
 
     mutating func run() throws {
-        let configURL = URL(fileURLWithPath: configAbsolutePath)
+        let config = ConfigParser.parse(from: configAbsolutePath)
+        let postgresDatabase = PostgresDatabase(config: config)
+        let buildScriptChecker = BuildScriptChecker(config: config)
 
-        guard let configData = try? Data(contentsOf: configURL),
-              let _ = try? JSONDecoder().decode(Config.self, from: configData) else {
-            return
+        if buildScriptChecker.shouldUpdateTables() {
+            if buildScriptChecker.savedBuildScriptString().isEmpty {
+                postgresDatabase.dropAllTables()
+            }
+
+            postgresDatabase.addTables()
+            buildScriptChecker.saveCurrentBuildScriptString()
         }
-
-        // TODO: (Aman Ketebo) Check current hash against drive api repo's build script hash
     }
 }
 
