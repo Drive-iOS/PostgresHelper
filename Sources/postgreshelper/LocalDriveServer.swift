@@ -7,7 +7,7 @@
 
 import Foundation
 
-class LocalDriveAPIServer {
+class LocalDriveAPIServer: LauncherProtocol {
     let config: Config
 
     init(config: Config) {
@@ -25,14 +25,6 @@ class LocalDriveAPIServer {
         } catch {
             print("❌ Failed to start server")
             exit(1)
-        }
-    }
-
-    private func launch(process: Process) throws {
-        if #available(OSX 10.13, *) {
-            try process.run()
-        } else {
-            process.launch()
         }
     }
 }

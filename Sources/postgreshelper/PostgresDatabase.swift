@@ -7,7 +7,7 @@
 
 import Foundation
 
-class PostgresDatabase {
+class PostgresDatabase: LauncherProtocol {
 
     // MARK: - Properties
 
@@ -69,13 +69,5 @@ class PostgresDatabase {
         process.arguments = ["-d", "\(config.postgres.localDatabase.databaseName)",
                              "-U", "\(config.postgres.localDatabase.username)"]
         return process
-    }
-
-    private func launch(process: Process) throws {
-        if #available(OSX 10.13, *) {
-            try process.run()
-        } else {
-            process.launch()
-        }
     }
 }
