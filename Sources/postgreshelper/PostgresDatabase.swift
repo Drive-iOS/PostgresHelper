@@ -48,8 +48,11 @@ class PostgresDatabase {
     // MARK: - Start
 
     func startServer() {
-        let process = newServerProcess()
+        let process = Process()
 
+        process.launchPath = "/usr/bin/osascript"
+        process.arguments = ["-e", "tell app \"Terminal\" to do script \"psql -d \(config.postgres.localDatabase.databaseName) -U \(config.postgres.localDatabase.username)\""]
+        
         do {
             try launch(process: process)
         } catch {
