@@ -5,6 +5,7 @@ let config = ConfigParser.parse(from: sourceRootAbsolutePath + "/postgres-local-
 let postgresDatabase = PostgresDatabase(config: config)
 let buildScriptChecker = BuildScriptChecker(config: config,
                                             sourceRootAbsolutePath: sourceRootAbsolutePath)
+let localDriveAPIServer = LocalDriveAPIServer(config: config)
 
 if buildScriptChecker.shouldUpdateTables() {
     if !buildScriptChecker.savedBuildScriptString().isEmpty {
@@ -14,3 +15,6 @@ if buildScriptChecker.shouldUpdateTables() {
     postgresDatabase.addTables()
     buildScriptChecker.saveCurrentBuildScriptString()
 }
+
+postgresDatabase.startServer()
+localDriveAPIServer.startServer()
