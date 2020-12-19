@@ -13,12 +13,16 @@ class BuildScriptChecker {
     let config: Config
     let fileManager: FileManager
 
+    private let savedBuildScriptAbsolutePath: String
+
     // MARK: - Init
 
     init(config: Config,
-         fileManager: FileManager = .default) {
+         fileManager: FileManager = .default,
+         sourceRootAbsolutePath: String) {
         self.config = config
         self.fileManager = fileManager
+        self.savedBuildScriptAbsolutePath = sourceRootAbsolutePath + "/postgres-saved-build-script.txt"
     }
 
     // MARK: - Checking
@@ -35,22 +39,22 @@ class BuildScriptChecker {
     func saveCurrentBuildScriptString() {
         let currentBuildScriptString = buildScriptString()
 
-        if fileManager.fileExists(atPath: config.postgres.savedBuildScript.absolutePath) {
+        if fileManager.fileExists(atPath: savedBuildScriptAbsolutePath) {
             do {
-                try currentBuildScriptString.write(toFile: config.postgres.savedBuildScript.absolutePath,
+                try currentBuildScriptString.write(toFile: savedBuildScriptAbsolutePath,
                                               atomically: true,
                                               encoding: .utf8)
             } catch {
-                print("❌ Failed to save current build string")
+                print("❌ Failed to save current build string - file existed")
                 exit(1)
             }
         } else {
-            let successfullyCreatedFile = fileManager.createFile(atPath: config.postgres.savedBuildScript.absolutePath,
+            let successfullyCreatedFile = fileManager.createFile(atPath: savedBuildScriptAbsolutePath,
                                                                  contents: Data(currentBuildScriptString.utf8),
                                                                  attributes: nil)
 
-            if successfullyCreatedFile {
-                print("❌ Failed to save current build string")
+            if !successfullyCreatedFile {
+                print("❌ Failed to save current build string - file DID NOT exist")
                 exit(1)
             }
         }
@@ -70,7 +74,11 @@ class BuildScriptChecker {
     }
 
     func savedBuildScriptString() -> String {
-        let savedBuildScriptURL = URL(fileURLWithPath: config.postgres.savedBuildScript.absolutePath)
+        let savedBuildScriptURL = URL(fileURLWithPath: savedBuildScriptAbsolutePath)
+
+        guard fileManager.fileExists(atPath: savedBuildScriptAbsolutePath) else {
+            return ""
+        }
 
         do {
             return try String(contentsOf: savedBuildScriptURL)
