@@ -13,7 +13,11 @@ let package = Package(
             name: "postgreshelper",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
-            ]),
+            ],
+            resources: [
+                .copy("Resources/close-terminal.applescript")
+            ]
+        ),
         .testTarget(
             name: "postgreshelperTests",
             dependencies: ["postgreshelper"]),
