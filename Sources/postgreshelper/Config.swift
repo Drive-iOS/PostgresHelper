@@ -10,6 +10,7 @@ import Foundation
 struct Config: Decodable {
     let postgres: ConfigPostgres
     let driveAPIRepo: ConfigDriveAPIRepo
+    let savedRunningTerminals: ConfigSavedRunningTerminals
 }
 
 struct ConfigPostgres: Decodable {
@@ -30,4 +31,8 @@ struct ConfigDriveAPIRepo: Decodable {
     let repoAbsolutePath: String
     let buildScriptAbsolutePath: String
     let dropTablesScriptAbsolutePath: String
+}
+
+struct ConfigSavedRunningTerminals: Decodable {
+    let absolutePath: String
 }
