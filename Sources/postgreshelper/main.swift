@@ -17,4 +17,4 @@ if buildScriptChecker.shouldUpdateTables() {
 }
 
 postgresDatabase.startServer()
-localDriveAPIServer.startServer()
+//localDriveAPIServer.startServer()

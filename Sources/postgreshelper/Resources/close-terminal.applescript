@@ -12,5 +12,7 @@ on run (windowID)
         tell application "System Events"
             click UI element "Terminate" of sheet 1 of window 1 of application process "Terminal"
         end tell
+
+        delay 2
     end tell
 end run

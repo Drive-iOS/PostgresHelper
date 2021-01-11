@@ -11,6 +11,8 @@ class LocalDriveAPIServer: LauncherProtocol {
     let config: Config
     let fileManager: FileManager
 
+    lazy var windowIDSaver = WindowIDSaver(config: config, fileManager: fileManager)
+
     init(config: Config,
          fileManager: FileManager = .default) {
         self.config = config
@@ -34,29 +36,8 @@ class LocalDriveAPIServer: LauncherProtocol {
             exit(1)
         }
 
-
-        // TODO: (Aman Ketebo) Clean up processing of output
-        if #available(macOS 10.15.4, *)  {
-            guard let processOutputData = try? pipe.fileHandleForReading.readToEnd() else {
-                return
-            }
-
-            guard let processOutput = String(data: processOutputData, encoding: .utf8) else {
-                return
-            }
-
-            guard let lastPortionOfProcessOutput = processOutput.split(separator: " ").last else {
-                return
-            }
-
-            let windowIDString = String(lastPortionOfProcessOutput).trimmingCharacters(in: .whitespacesAndNewlines)
-
-            guard let windowID = Int(windowIDString) else {
-                return
-            }
-
-            print("Here's the window ID for local postgres drive server: \(windowID)")
-        }
+        let processOutputData = pipe.fileHandleForReading.readDataToEndOfFile()
+        windowIDSaver.saveID(for: .postgres, from: processOutputData)
     }
 
     private func closeRunningAPIServerIfNeeded() {
@@ -69,6 +50,10 @@ class LocalDriveAPIServer: LauncherProtocol {
             return
         }
 
+        guard let driveAPIRepoTerminalWindowID = runningTerminalsInfo.driveAPIRepoTerminalWindowID else {
+            return
+        }
+
         guard let closeTerminalScriptPath = Bundle.module.path(forResource: "close-terminal", ofType: "applescript") else {
             return
         }
@@ -76,7 +61,7 @@ class LocalDriveAPIServer: LauncherProtocol {
         let process = Process()
 
         process.launchPath = "/usr/bin/osascript"
-        process.arguments = [closeTerminalScriptPath, String(runningTerminalsInfo.driveAPIRepoTerminalWindowID)]
+        process.arguments = [closeTerminalScriptPath, String(driveAPIRepoTerminalWindowID)]
 
         do {
             try launch(process: process)
@@ -85,8 +70,4 @@ class LocalDriveAPIServer: LauncherProtocol {
             exit(1)
         }
     }
-}
-
-struct RunningTerminalsInfo: Codable {
-    let driveAPIRepoTerminalWindowID: Int
 }
